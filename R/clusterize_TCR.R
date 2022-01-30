@@ -64,11 +64,13 @@ clusterize_TCR <- function(sequence_df, chains, tmp_folder, id_col,
   sequence_dt <- data.table::as.data.table(sequence_df)
 
   # remove alleles
-  sequence_dt[, v_beta = gsub("\\*.+$", "", v_beta)]
-  sequence_dt[, j_beta = gsub("\\*.+$", "", j_beta)]
+  setnames(sequence_dt, old = c('v_beta','j_beta'), new = c('v_beta_raw','j_beta_raw'))
+  sequence_dt[, v_beta = gsub("\\*.+$", "", v_beta_raw)]
+  sequence_dt[, j_beta = gsub("\\*.+$", "", j_beta_raw)]
   if (chains == "AB") {
-    sequence_dt[, v_alpha = gsub("\\*.+$", "", v_alpha)]
-    sequence_dt[, j_alpha = gsub("\\*.+$", "", j_alpha)]
+    setnames(sequence_dt, old = c('v_alpha','j_alpha'), new = c('v_alpha_raw','j_alpha_raw'))
+    sequence_dt[, v_alpha = gsub("\\*.+$", "", v_alpha_raw)]
+    sequence_dt[, j_alpha = gsub("\\*.+$", "", j_alpha_raw)]
   }
 
   # filter out sequences with non-IMGT genes
@@ -164,12 +166,21 @@ clusterize_TCR <- function(sequence_df, chains, tmp_folder, id_col,
                                      vertices = as.character(sequence_df$receptor_id))
   clusters <- igraph::clusters(g)$membership
 
+  # return columns with initial V gene names to the table
+  sequence_dt[, c("v_beta", "j_beta") := NULL]
+  setnames(sequence_dt, old = c('v_beta_raw','j_beta_raw'), new = c('v_beta','j_beta'))
+  if (chains == "AB") {
+    sequence_dt[, c("v_alpha", "j_alpha") := NULL]
+    setnames(sequence_dt, old = c('v_alpha_raw','j_alpha_raw'), new = c('v_alpha','j_alpha'))
+  }
+
   clusters <- clusters %>%
     stack %>%
     dplyr::rename(cluster_id = values,
                   receptor_id = ind) %>%
     dplyr::mutate(receptor_id = as.integer(as.character(receptor_id))) %>%
-    merge(sequence_df, by = "receptor_id")
+    # merge to the full data.table to add all the info
+    merge(sequence_dt, by = "receptor_id")
 
   return(clusters)
 }
