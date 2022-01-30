@@ -23,7 +23,7 @@ A data frame with 2000 rows and 6 variables:
 example_TCR_df
 }
 \description{
-An exemplary dataset containing junction sequences and V and J genes of 2000
+An exemplary dataset containing junction sequences and V and J genes of 1000
 TCRs randomly sampled from VDJdb database.
 }
 \references{

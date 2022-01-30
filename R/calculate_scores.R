@@ -72,7 +72,7 @@ get_scores_beta <- function(dt, receptor1, receptor2_vec,
                                                          receptor_pairs$to_cdr3_beta)
 
   # write output in a temporary file
-  filename <- paste0(output_file_prefix, receptor1, ".csv")
+  filename <- paste0(output_file_prefix, receptor1, ".txt")
   receptor_pairs %>%
     utils::write.table(filename, quote=F, row.names=F, sep="\t")
 }
@@ -121,8 +121,7 @@ calculate_scores <- function(sequence_dt, chains, tmp_folder, scores_filename, n
     }
 
     # get alignment scores
-    print("Aligning sequences...")
-    a <- Sys.time()
+    #a <- Sys.time()
     if (chains == "AB") {
       x <- parallel::mclapply(seq_len(nrow(sequence_dt) - 1),
                               function(i) get_scores_paired(sequence_dt,
@@ -157,7 +156,7 @@ calculate_scores <- function(sequence_dt, chains, tmp_folder, scores_filename, n
 
     # load the file and calculate BL_score
     graph <- data.table::fread(merged_file)
-    graph$score <- calc_BL_score(graph, chains)
+    graph[, score := calc_BL_score(graph, chains)]
     cols <- c("from_receptor_id", "to_receptor_id", "score")
     graph <- graph[, ..cols]
 
@@ -170,9 +169,9 @@ calculate_scores <- function(sequence_dt, chains, tmp_folder, scores_filename, n
       }
     }
 
-    b <- Sys.time()
-    time_diff <- b-a
-    print(paste0("Scores were calculated in ", round(time_diff, 3), " ", units(time_diff)))
+    #b <- Sys.time()
+    #time_diff <- b-a
+    #print(paste0("Scores were calculated in ", round(time_diff, 3), " ", units(time_diff)))
 
     graph
   },

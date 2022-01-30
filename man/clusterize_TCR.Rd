@@ -31,7 +31,7 @@ alpha and beta chains.}
 \item{tmp_folder}{Path to a directory for storing temporary files which are
 deleted when clustering is finished.}
 
-\item{id_col}{Name of a column with unique ids for each TCR (optional).}
+\item{id_col}{Name of a column with unique ids for each TCR.}
 
 \item{scores_filename}{If a character string for naming a file is provided
 BL-scores of each TCR pair will be exported to this file. Supported formats: .Rds, .csv.}
@@ -53,9 +53,4 @@ The default clustering thresholds were defined to optimally detect clusters of
 TCRs recognizing the same epitope. If instead of full junction only CDR3 sequence
 witout flanking residues is provided the scores will be overestimated which may
 lead to wrong cluster assignment.
-}
-\examples{
-head(example_TCR_df)
-clusterize_TCR(example_TCR_df, chains="AB", tmp_folder=".", ncores=4)
-
 }

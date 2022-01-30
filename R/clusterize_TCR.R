@@ -9,7 +9,7 @@
 #' not used for score calculation.
 #'
 #' If chains="AB" junction_alpha, v_alpha and j_alpha must be provided too.
-#' @param id_col Name of a column with unique ids for each TCR (optional).
+#' @param id_col Name of a column with unique ids for each TCR.
 #' @param chains Which chains to cluster. "B" for beta chain only, "AB" for paired
 #' alpha and beta chains.
 #' @param tmp_folder Path to a directory for storing temporary files which are
@@ -30,9 +30,8 @@
 #' lead to wrong cluster assignment.
 #'
 #' @examples
-#' head(example_TCR_df)
-#' clusterize_TCR(example_TCR_df, chains="AB", tmp_folder=".", ncores=4)
-#'
+# clusters <- clusterize_TCR(example_TCR_df, chains="AB", id_col="id", tmp_folder=".", ncores=2)
+#
 clusterize_TCR <- function(sequence_df, chains, tmp_folder, id_col,
                            scores_filename=NA, threshold=NA, ncores=1){
 
@@ -80,7 +79,7 @@ clusterize_TCR <- function(sequence_df, chains, tmp_folder, id_col,
   unkn_genes <- genes[!genes %in% imgt_gene_list]
   if (length(unkn_genes) > 0) {
     message(paste("Unknown genes detected: ", paste(unkn_genes, collapse = ", "),
-                  "Sequences carrying these genes will not be processed"))
+                  "Sequences carrying these genes will be filtered out"))
 
     sequence_dt <- sequence_dt[!sequence_dt$v_beta %in% unkn_genes]
     sequence_dt <- sequence_dt[!sequence_dt$j_beta %in% unkn_genes]
@@ -95,7 +94,7 @@ clusterize_TCR <- function(sequence_df, chains, tmp_folder, id_col,
   # filter out short junction sequences
   n_short_beta <- sum(nchar(sequence_dt$junction_beta) < 5)
   if (n_short_beta > 0) {
-    message(paste0(n_short_beta, " sequences having short junction in beta chain (<5 aa) will not be processed"))
+    message(paste0(n_short_beta, " sequences having short junction in beta chain (<5 aa) will be filtered out"))
     sequence_dt <- sequence_dt[nchar(sequence_dt$junction_beta) > 4]
   }
 
@@ -103,7 +102,7 @@ clusterize_TCR <- function(sequence_df, chains, tmp_folder, id_col,
   if (chains == "AB") {
     n_short_alpha <- sum(nchar(sequence_dt$junction_alpha) < 5)
     if (n_short_alpha > 0) {
-      message(paste0(n_short_alpha, " sequences having short junction in alpha chain (<5 aa) will not be processed"))
+      message(paste0(n_short_alpha, " sequences having short junction in alpha chain (<5 aa) will be filtered out"))
       sequence_dt <- sequence_dt[nchar(sequence_dt$junction_alpha) > 4]
     }
   }
@@ -119,40 +118,29 @@ clusterize_TCR <- function(sequence_df, chains, tmp_folder, id_col,
   }
 
   if (length(has_stop) > 0) {
-    message(paste0(length(has_stop), " sequences having stop codon in junction will not be processed"))
+    message(paste0(length(has_stop), " sequences having stop codon in junction will be filtered out"))
     sequence_dt <- sequence_dt[-has_stop,]
   }
 
 
-  # select or create unique receptor_id column and index the data.table
-  if (missing(id_col)) {
-    sequence_dt[, receptor_id := seq_len(.N)]
-
-  } else {
-    # check if id_col exists
-    if (id_col %in% colnames(sequence_dt)) {
-      # check if id_col contains unique values
-      if (nrow(sequence_dt) != length(unique(sequence_dt[[id_col]]))) {
-        warning(paste0("Provided id_col (", id_col,
-                       ") contains duplicated values, ids will be generated based on the order in the input table" ))
-        sequence_dt[, receptor_id := seq_len(.N)]
-      } else {
-        sequence_dt[, receptor_id := get(id_col)]
-      }
-    } else {
-      warning(paste0("Column with name ", id_col,
-                     " is not found, ids will be generated based on the order in the input table" ))
-      sequence_dt[, receptor_id := seq_len(.N)]
-    }
+  # check if id_col exists
+  if (!id_col %in% colnames(sequence_dt)) {
+    stop(paste0("Column with name ", id_col, " is not found, please provide a valid column name"))
   }
+
+  # check if id_col contains unique values
+  if (nrow(sequence_dt) != length(unique(sequence_dt[[id_col]]))) {
+    stop(paste0("Provided id_col (", id_col,
+                       ") contains duplicated values, please provide a column with unique ids" ))
+  }
+
+  sequence_dt[, receptor_id := get(id_col)]
+  data.table::setkey(sequence_dt, receptor_id)
 
   # check if data table is not empty
   if (nrow(sequence_dt) < 2) {
     stop(paste0(nrow(sequence_dt), " sequences, nothing to cluster!"))
   }
-
-  data.table::setkey(sequence_dt, receptor_id)
-
 
   ### CALCULATE SCORES
   scored_rec_pairs <- calculate_scores(sequence_dt, chains, tmp_folder, scores_filename, ncores)
@@ -163,7 +151,9 @@ clusterize_TCR <- function(sequence_df, chains, tmp_folder, id_col,
     threshold <- if (chains == "AB") threshold_AB else threshold_B
   }
 
-  sim_rec_pairs <- scored_rec_pairs[score > threshold, .(from_receptor_id, to_receptor_id, weight = score)]
+  sim_rec_pairs <- scored_rec_pairs %>%
+    dplyr::filter(score > threshold) %>%
+    dplyr::select(from_receptor_id, to_receptor_id, weight = score)
   # node ids should be characters otherwise messed up by igraph
   sim_rec_pairs$from_receptor_id <- as.character(sim_rec_pairs$from_receptor_id)
   sim_rec_pairs$to_receptor_id <- as.character(sim_rec_pairs$to_receptor_id)
@@ -182,12 +172,13 @@ clusterize_TCR <- function(sequence_df, chains, tmp_folder, id_col,
   }
 
   clusters <- clusters %>%
-    stack %>%
+    utils::stack() %>%
     dplyr::rename(cluster_id = values,
                   receptor_id = ind) %>%
     dplyr::mutate(receptor_id = as.integer(as.character(receptor_id))) %>%
     # merge to the full data.table to add all the info
-    merge(sequence_dt, by = "receptor_id")
+    merge(sequence_dt, by = "receptor_id") %>%
+    dplyr::select(-receptor_id)
 
   return(clusters)
 }
