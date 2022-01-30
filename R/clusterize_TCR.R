@@ -30,7 +30,8 @@
 #' lead to wrong cluster assignment.
 #'
 #' @examples
-#' clusterize_TCR(sequence_df, chains="AB", tmp_folder=".", ncores=4)
+#' head(example_TCR_df)
+#' clusterize_TCR(example_TCR_df, chains="AB", tmp_folder=".", ncores=4)
 #'
 clusterize_TCR <- function(sequence_df, chains, tmp_folder, id_col,
                            scores_filename=NA, threshold=NA, ncores=1){
@@ -64,13 +65,13 @@ clusterize_TCR <- function(sequence_df, chains, tmp_folder, id_col,
   sequence_dt <- data.table::as.data.table(sequence_df)
 
   # remove alleles
-  setnames(sequence_dt, old = c('v_beta','j_beta'), new = c('v_beta_raw','j_beta_raw'))
-  sequence_dt[, v_beta = gsub("\\*.+$", "", v_beta_raw)]
-  sequence_dt[, j_beta = gsub("\\*.+$", "", j_beta_raw)]
+  data.table::setnames(sequence_dt, old = c('v_beta','j_beta'), new = c('v_beta_raw','j_beta_raw'))
+  sequence_dt[, v_beta := sub("\\*.+$", "", v_beta_raw)]
+  sequence_dt[, j_beta := sub("\\*.+$", "", j_beta_raw)]
   if (chains == "AB") {
-    setnames(sequence_dt, old = c('v_alpha','j_alpha'), new = c('v_alpha_raw','j_alpha_raw'))
-    sequence_dt[, v_alpha = gsub("\\*.+$", "", v_alpha_raw)]
-    sequence_dt[, j_alpha = gsub("\\*.+$", "", j_alpha_raw)]
+    data.table::setnames(sequence_dt, old = c('v_alpha','j_alpha'), new = c('v_alpha_raw','j_alpha_raw'))
+    sequence_dt[, v_alpha := sub("\\*.+$", "", v_alpha_raw)]
+    sequence_dt[, j_alpha := sub("\\*.+$", "", j_alpha_raw)]
   }
 
   # filter out sequences with non-IMGT genes
@@ -168,10 +169,10 @@ clusterize_TCR <- function(sequence_df, chains, tmp_folder, id_col,
 
   # return columns with initial V gene names to the table
   sequence_dt[, c("v_beta", "j_beta") := NULL]
-  setnames(sequence_dt, old = c('v_beta_raw','j_beta_raw'), new = c('v_beta','j_beta'))
+  data.table::setnames(sequence_dt, old = c('v_beta_raw','j_beta_raw'), new = c('v_beta','j_beta'))
   if (chains == "AB") {
     sequence_dt[, c("v_alpha", "j_alpha") := NULL]
-    setnames(sequence_dt, old = c('v_alpha_raw','j_alpha_raw'), new = c('v_alpha','j_alpha'))
+    data.table::setnames(sequence_dt, old = c('v_alpha_raw','j_alpha_raw'), new = c('v_alpha','j_alpha'))
   }
 
   clusters <- clusters %>%
@@ -185,4 +186,4 @@ clusterize_TCR <- function(sequence_df, chains, tmp_folder, id_col,
   return(clusters)
 }
 
-
+.datatable.aware = TRUE

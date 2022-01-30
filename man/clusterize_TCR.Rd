@@ -55,6 +55,7 @@ witout flanking residues is provided the scores will be overestimated which may
 lead to wrong cluster assignment.
 }
 \examples{
-clusterize_TCR(sequence_df, chains="AB", tmp_folder=".", ncores=4)
+head(example_TCR_df)
+clusterize_TCR(example_TCR_df, chains="AB", tmp_folder=".", ncores=4)
 
 }

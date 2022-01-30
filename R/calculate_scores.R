@@ -146,11 +146,11 @@ calculate_scores <- function(sequence_dt, chains, tmp_folder, scores_filename, n
     merged_file <- paste0(tmp_folder, "/BL_scores.csv")
 
     # get column names from one of the files
-    out_colnames <- colnames(fread(paste0(tmp_folder_full, sequence_dt$receptor_id[1], ".csv")))
+    out_colnames <- colnames(data.table::fread(paste0(tmp_folder_full, sequence_dt$receptor_id[1], ".csv")))
     write(paste(out_colnames, collapse = "\t"), merged_file)
 
     for (file in list.files(tmp_folder_full, full.names = T)) {
-      fread(file) %>%
+      data.table::fread(file) %>%
         write.table(merged_file,
                     sep = '\t', row.names = F, col.names = F, quote = F, append = T)
       system(paste0("rm -r ", file))
