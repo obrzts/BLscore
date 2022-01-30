@@ -7,7 +7,7 @@
 <!-- badges: end -->
 
 BLscore provides functions to identify clusters of convergent TCRs that
-are likely to recognize the same peptide. The clustering is based on
+are likely to recognize the same epitope. The clustering is based on
 pairwise comparisons of all TCRs by aligning their CDR1-3 and
 calculating the alignment scores using BLOSUM62 substitution matrix
 reflecting evolutionary amino acid interchangeability. The three
@@ -31,11 +31,43 @@ devtools::install_github("obrzts/BLscore_private")
 
 ## Usage
 
-``` r
-library(BLscore)
-#head(sample_data_B)
-```
+BLscore’s main function is `clusterize_TCR` which takes a data.frame
+with TCR sequence data, calculate pairwise BL-scores, uses them to
+define clusters of similar TCRs and return a data.frame with cluster
+ids.
+
+The input data.frame must contain following fields:
+
+-   junction_beta - amino acid sequence of CDR3 plus the two flanking
+    conserved residues;
+-   v_beta, j_beta - V and J gene with or without allele; allele
+    information is not used for score calculation.
+
+If paired chain clustering is desired junction_alpha, v_alpha and
+j_alpha must be provided too.
+
+An example data.frame is provided with the package:
 
 ``` r
-#clusterize_TCR(sample_data_B, chains="AB", tmp_folder=".", ncores=4)
+library(BLscore)
+head(example_TCR_df)
+#>     v_beta  j_beta   junction_beta    junction_alpha      v_alpha j_alpha id
+#> 1   TRBV15 TRBJ1-2 CATRRNRGNTYGYTF    CAVRQTAAGNKLTF       TRAV21  TRAJ17  1
+#> 2   TRBV13 TRBJ2-2    CASRQTSGELFF     CAVKGGGADGITF      TRAV8-1  TRAJ45  2
+#> 3  TRBV7-9 TRBJ1-5 CASSSSLAGDQPQHF     CATDGGGAQKLVF       TRAV17  TRAJ54  3
+#> 4 TRBV12-4 TRBJ2-1 CASSLSGGSYNEQFF    CVVNPVDSSYKLIF     TRAV12-1  TRAJ12  4
+#> 5 TRBV12-4 TRBJ2-7 CASSSSGVGFYEQYF     CARGETSYDKVIF     TRAV13-1  TRAJ50  5
+#> 6 TRBV12-3 TRBJ2-7    CASSFGVYEQYF CAYSSGAGGTSYGKLTF TRAV38-2/DV8  TRAJ52  6
+```
+
+Note, that the default clustering thresholds were defined to optimally
+detect clusters of TCRs recognizing the same epitope. If instead of full
+junction only CDR3 sequence witout flanking residues is provided the
+scores will be overestimated which may lead to wrong cluster assignment.
+
+Usage example:
+
+``` r
+# clusters = clusterize_TCR(example_TCR_df, chains="AB", tmp_folder=".", ncores=4)
+# head(clusters)
 ```
