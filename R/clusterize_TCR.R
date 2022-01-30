@@ -79,7 +79,7 @@ clusterize_TCR <- function(sequence_df, chains, tmp_folder, id_col,
                     sequence_dt$j_alpha, sequence_dt$j_beta))
   unkn_genes <- genes[!genes %in% imgt_gene_list]
   if (length(unkn_genes) > 0) {
-    warning(paste("Unknown genes detected: ", paste(unkn_genes, collapse = ", "),
+    message(paste("Unknown genes detected: ", paste(unkn_genes, collapse = ", "),
                   "Sequences carrying these genes will not be processed"))
 
     sequence_dt <- sequence_dt[!sequence_dt$v_beta %in% unkn_genes]
@@ -95,7 +95,7 @@ clusterize_TCR <- function(sequence_df, chains, tmp_folder, id_col,
   # filter out short junction sequences
   n_short_beta <- sum(nchar(sequence_dt$junction_beta) < 5)
   if (n_short_beta > 0) {
-    warning(paste0(n_short_beta, " sequences having short junction in beta chain (<5 aa) will not be processed"))
+    message(paste0(n_short_beta, " sequences having short junction in beta chain (<5 aa) will not be processed"))
     sequence_dt <- sequence_dt[nchar(sequence_dt$junction_beta) > 4]
   }
 
@@ -103,7 +103,7 @@ clusterize_TCR <- function(sequence_df, chains, tmp_folder, id_col,
   if (chains == "AB") {
     n_short_alpha <- sum(nchar(sequence_dt$junction_alpha) < 5)
     if (n_short_alpha > 0) {
-      warning(paste0(n_short_alpha, " sequences having short junction in alpha chain (<5 aa) will not be processed"))
+      message(paste0(n_short_alpha, " sequences having short junction in alpha chain (<5 aa) will not be processed"))
       sequence_dt <- sequence_dt[nchar(sequence_dt$junction_alpha) > 4]
     }
   }
@@ -119,7 +119,7 @@ clusterize_TCR <- function(sequence_df, chains, tmp_folder, id_col,
   }
 
   if (length(has_stop) > 0) {
-    warning(paste0(length(has_stop), " sequences having stop codon in junction will not be processed"))
+    message(paste0(length(has_stop), " sequences having stop codon in junction will not be processed"))
     sequence_dt <- sequence_dt[-has_stop,]
   }
 
