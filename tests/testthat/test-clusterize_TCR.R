@@ -31,6 +31,5 @@ test_that("filters work", {
 })
 
 test_that("no error occurs", {
-  example_TCR_df
   expect_error(clusterize_TCR(example_TCR_df, chains="AB", tmp_folder=".", id_col="id", ncores=2), NA)
 })

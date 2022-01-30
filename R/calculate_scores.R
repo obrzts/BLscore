@@ -119,7 +119,7 @@ calculate_scores <- function(sequence_dt, chains, tmp_folder, scores_filename, n
     }
 
     # get alignment scores
-    a <- Sys.time()
+    # a <- Sys.time()
     if (chains == "AB") {
       x <- parallel::mclapply(seq_len(nrow(sequence_dt) - 1),
                               function(i) get_scores_paired(sequence_dt,
@@ -137,7 +137,7 @@ calculate_scores <- function(sequence_dt, chains, tmp_folder, scores_filename, n
     } else {
       stop("Unrecognized chains argument (specify AB or B)")
     }
-    a1 <- Sys.time()
+    # a1 <- Sys.time()
 
     # create one merged file and delete temporary files
     merged_file <- paste0(tmp_folder, "/BL_scores.csv")
@@ -167,12 +167,12 @@ calculate_scores <- function(sequence_dt, chains, tmp_folder, scores_filename, n
       }
     }
 
-    b <- Sys.time()
-    time_diff <- b-a
-    print(paste0("Scores were calculated in ", round(time_diff, 3), " ", units(time_diff)))
-
-    time_diff <- b-a1
-    print(paste0("Aligned in ", round(time_diff, 3), " ", units(time_diff)))
+    # b <- Sys.time()
+    # time_diff <- b-a
+    # print(paste0("Scores were calculated in ", round(time_diff, 3), " ", units(time_diff)))
+    #
+    # time_diff <- b-a1
+    # print(paste0("Aligned in ", round(time_diff, 3), " ", units(time_diff)))
 
     graph
   },

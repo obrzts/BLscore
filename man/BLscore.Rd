@@ -3,4 +3,8 @@
 \docType{package}
 \name{BLscore}
 \alias{BLscore}
-\title{BLscore: A package for clustering similar TCRs likely recognizing same epitope}
+\title{BLscore: TCR sequence clustering}
+\description{
+Find clusters of similar TCRs that are likely to recognize the
+same epitope
+}
