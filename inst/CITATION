@@ -1,0 +1,9 @@
+citHeader("To cite BLscore in publications use:")
+
+citEntry(
+  entry    = "Article",
+  title    = "Clonal evolution and specificity of the human T follicular helper cell response to Plasmodium falciparum circumsporozoite protein",
+  author   = "Ilka Wahl, Anna Obraztsova, Julia Puchan, Rebecca Hundsdorfer, Sumana Chakravarty, B. Kim Lee Sim, Stephen L. Hoffman, Peter G. Kremsner,  View ORCID ProfileBenjamin Mordmüller,  View ORCID ProfileHedda Wardemann"",
+  journal  = bioRxiv,
+  year     = 2021
+)
