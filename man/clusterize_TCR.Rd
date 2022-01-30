@@ -2,7 +2,7 @@
 % Please edit documentation in R/clusterize_TCR.R
 \name{clusterize_TCR}
 \alias{clusterize_TCR}
-\title{Find TCR clusters}
+\title{TCR sequence clustering}
 \usage{
 clusterize_TCR(
   sequence_df,
@@ -15,26 +15,43 @@ clusterize_TCR(
 )
 }
 \arguments{
-\item{sequence_df}{A data.frame containing TCR sequence data. Each row must describe a unique TCR sequence. Required columns: cdr3_beta, v_beta, j_beta (for beta chain or paired chains clustering) and cdr3_alpha, v_alpha, j_alpha (paired chains clustering only).}
+\item{sequence_df}{A data.frame containing TCR sequence data. Each row must
+describe a unique TCR sequence. Following fields are required:
+\itemize{
+\item junction_beta - amino acid sequence of CDR3 plus the two flanking conserved residues
+\item v_beta, j_beta - V and J gene with or without allele
+}
 
-\item{chains}{"B" for beta chain only, "AB" for paired chains.}
+If chains="AB" junction_alpha, v_alpha and j_alpha must be provided too.}
 
-\item{tmp_folder}{Path to a directory for storing temporary files which are deleted after clustering is finished.}
+\item{chains}{Which chains to cluster. "B" for beta chain only, "AB" for paired alpha and beta chains.}
+
+\item{tmp_folder}{Path to a directory for storing temporary files which are
+deleted when clustering is finished.}
 
 \item{id_col}{Name of a column with unique ids for each TCR (optional).}
 
-\item{scores_filename}{If character string for naming a file is provided, BL-scores of each TCR pair will be exported to this file. Supported formats: .Rds, .csv.}
+\item{scores_filename}{If character string for naming a file is provided
+BL-scores of each TCR pair will be exported to this file. Supported formats: .Rds, .csv.}
 
 \item{threshold}{Clustering threshold (optional).}
 
 \item{ncores}{The number of cores to use for parallel computation (default = 1).}
 }
 \value{
-A data.frame containing same information as sequence_df plus the cluster ids. If scores_filename is provided a file with pairwise BL-scores is created.
+A data.frame containing same information as sequence_df plus the cluster ids.
+If scores_filename is provided a file with pairwise BL-scores is created.
 }
 \description{
-Find TCR clusters
+Find clusters of similar TCRS that are likely to recognize the same epitope.
+}
+\details{
+The default clustering thresholds were defined to optimally detect clusters of
+TCRs recognizing the same epitope. If instead of full junction only CDR3 sequence
+witout flanking residues is provided the scores will be overestimated which may
+lead to wrong cluster assignment.
 }
 \examples{
-'clusterize_TCR(sequence_df, chains="AB, tmp_folder=".", ncores=4)'
+clusterize_TCR(sequence_df, chains="AB", tmp_folder=".", ncores=4)
+
 }

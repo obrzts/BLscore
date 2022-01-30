@@ -1,25 +1,33 @@
+#' Pairwise sequence alignment using pre-defined score matrix and gap opening and extension
+#' weights
+#'
+#' @param seq_vector1 Vector of patterns for alignment
+#' @param seq_vector2 Vector of subjects for alignment
+#'
+#' @return Vector of alignment scores
+#' @noRd
 get_alignment_scores <- function(seq_vector1, seq_vector2){
-  
+
   Biostrings::pairwiseAlignment(Biostrings::AAStringSet(seq_vector1),
                                 Biostrings::AAStringSet(seq_vector2),
                                 substitutionMatrix = submat,
-                                gapOpening = gap_open, 
+                                gapOpening = gap_open,
                                 gapExtension = gap_ext,
                                 scoreOnly = T)
-  
+
 }
 
 
-get_scores_paired <- function(dt, 
-                              receptor1, receptor2_vec, 
+get_scores_paired <- function(dt,
+                              receptor1, receptor2_vec,
                               output_file_prefix){
-  
+
   # generate table with receptor pairs
-  col_names = c("receptor_id", "cdr3_beta", "v_beta", "j_beta",
+  col_names <- c("receptor_id", "cdr3_beta", "v_beta", "j_beta",
                 "cdr3_alpha", "v_alpha", "j_alpha")
   receptor_pairs <- dt[.(receptor2_vec), ..col_names]
   colnames(receptor_pairs) <- paste("to", col_names, sep = "_")
-  suppressWarnings(receptor_pairs[,  paste("from", col_names, sep = "_") := 
+  suppressWarnings(receptor_pairs[,  paste("from", col_names, sep = "_") :=
                                     as.list(dt[.(receptor1), ..col_names])])
   receptor_pairs <- receptor_pairs %>%
     merge(trv_scores %>% dplyr::rename_all(function(x) paste0(x, "_beta")), all.x=T,
@@ -30,41 +38,41 @@ get_scores_paired <- function(dt,
           by = c("from_v_alpha", "to_v_alpha")) %>%
     merge(trj_scores %>% dplyr::rename_all(function(x) paste0(x, "_alpha")), all.x=T,
           by = c("from_j_alpha", "to_j_alpha"))
-  
+
   # align sequences
   receptor_pairs$cdr3_alpha_score <- get_alignment_scores(receptor_pairs$from_cdr3_alpha,
                                                           receptor_pairs$to_cdr3_alpha)
   receptor_pairs$cdr3_beta_score <- get_alignment_scores(receptor_pairs$from_cdr3_beta,
                                                          receptor_pairs$to_cdr3_beta)
-  
+
   # write output in a temporary file
-  filename = paste0(output_file_prefix, receptor1, ".csv")
+  filename <- paste0(output_file_prefix, receptor1, ".csv")
   receptor_pairs %>%
     write.table(filename, quote=F, row.names=F, sep="\t")
 }
 
 
-get_scores_beta <- function(dt, receptor1, receptor2_vec, 
+get_scores_beta <- function(dt, receptor1, receptor2_vec,
                             output_file_prefix){
-  
+
   # generate table with receptor pairs
-  col_names = c("receptor_id", "cdr3_beta", "v_beta", "j_beta")
+  col_names <- c("receptor_id", "cdr3_beta", "v_beta", "j_beta")
   receptor_pairs <- dt[.(receptor2_vec), ..col_names]
   colnames(receptor_pairs) <- paste("to", col_names, sep = "_")
-  suppressWarnings(receptor_pairs[,  paste("from", col_names, sep = "_") := 
+  suppressWarnings(receptor_pairs[,  paste("from", col_names, sep = "_") :=
                    as.list(dt[.(receptor1), ..col_names])])
   receptor_pairs <- receptor_pairs %>%
     merge(trv_scores %>% dplyr::rename_all(function(x) paste0(x, "_beta")), all.x=T,
           by = c("from_v_beta", "to_v_beta")) %>%
     merge(trj_scores %>% dplyr::rename_all(function(x) paste0(x, "_beta")), all.x=T,
           by = c("from_j_beta", "to_j_beta"))
-  
+
   # align sequences
   receptor_pairs$cdr3_beta_score <- get_alignment_scores(receptor_pairs$from_cdr3_beta,
                                                          receptor_pairs$to_cdr3_beta)
-  
+
   # write output in a temporary file
-  filename = paste0(output_file_prefix, receptor1, ".csv")
+  filename <- paste0(output_file_prefix, receptor1, ".csv")
   receptor_pairs %>%
     write.table(filename, quote=F, row.names=F, sep="\t")
 }
@@ -72,115 +80,109 @@ get_scores_beta <- function(dt, receptor1, receptor2_vec,
 
 calc_BL_score <- function(data, chains, regions){
   # get feature names
-  #model_coeff <- readRDS(model_coeff_file)
-  if (chains == "AB"){
-    model_coeff = model_coeff_AB
-  } else {
-    model_coeff = model_coeff_B
-  }
-  
+  model_coeff <- if (chains == "AB") model_coeff_AB else model_coeff_B
   feature_names <- names(model_coeff)
   feature_names <- feature_names[-grep("Intercept", feature_names)]
-  
+
   # calculate scores
-  coeff_mat = as.matrix(model_coeff)
-  data_mat = as.matrix(data[, ..feature_names])
-  
+  coeff_mat <- as.matrix(model_coeff)
+  data_mat <- as.matrix(data[, ..feature_names])
+
   1 / (1 + exp(-(data_mat %*% coeff_mat[feature_names,] + model_coeff["(Intercept)"])))
 }
 
 
-get_scores <- function(sequence_dt, chains, tmp_folder, scores_filename, ncores){
+calculate_scores <- function(sequence_dt, chains, tmp_folder, scores_filename, ncores){
   res <- tryCatch({
-    
+
     # load substitution matrix
     # submat = read.csv("data/subst_matrix.csv")
-    
+
     # load non CDR3 scores
     # trv_scores <- read.csv("data/trv_scores.csv", sep = "\t")
     # trj_scores <- read.csv("data/trj_scores.csv", sep = "\t")
-    
+
     # create temporary folder for files with individual receptor alignment results
     # individual results are stored and then merged to avoid RAM overconsumption
-    tmp_folder_full = paste0(tmp_folder, "/BL_score_tmp/")
+    tmp_folder_full <- paste0(tmp_folder, "/BL_score_tmp/")
     system(paste0("mkdir ", tmp_folder_full))
-    
+
     # get alignment scores
     print("Aligning sequences...")
     a <- Sys.time()
-    if (chains == "AB"){
+    if (chains == "AB") {
       x <- parallel::mclapply(1:(nrow(sequence_dt) - 1),
                               function(i) get_scores_paired(sequence_dt,
                                                             receptor1 = sequence_dt$receptor_id[i],
                                                             receptor2_vec = sequence_dt$receptor_id[(i+1):nrow(sequence_dt)],
                                                             tmp_folder_full),
                               mc.cores = ncores)
-    } else if (chains == "B"){
-      x <- parallel::mclapply(1:(nrow(sequence_dt) - 1), 
+    } else if (chains == "B") {
+      x <- parallel::mclapply(1:(nrow(sequence_dt) - 1),
                               function(i) get_scores_beta(sequence_dt,
-                                                          receptor1 = sequence_dt$receptor_id[i], 
-                                                          receptor2_vec = sequence_dt$receptor_id[(i+1):nrow(sequence_dt)], 
-                                                          tmp_folder_full), 
+                                                          receptor1 = sequence_dt$receptor_id[i],
+                                                          receptor2_vec = sequence_dt$receptor_id[(i+1):nrow(sequence_dt)],
+                                                          tmp_folder_full),
                               mc.cores = ncores)
     } else {
       stop("Unrecognized chains argument (specify AB or B)")
     }
-    
+
     # create one merged file and delete temporary files
-    merged_file = paste0(tmp_folder, "/BL_scores.csv")
-    
+    merged_file <- paste0(tmp_folder, "/BL_scores.csv")
+
     # get column names from one of the files
-    out_colnames = colnames(fread(paste0(tmp_folder_full, sequence_dt$receptor_id[1], ".csv")))
+    out_colnames <- colnames(fread(paste0(tmp_folder_full, sequence_dt$receptor_id[1], ".csv")))
     write(paste(out_colnames, collapse = "\t"), merged_file)
-    
-    for (file in list.files(tmp_folder_full, full.names = T)){
+
+    for (file in list.files(tmp_folder_full, full.names = T)) {
       fread(file) %>%
-        write.table(merged_file, 
+        write.table(merged_file,
                     sep = '\t', row.names = F, col.names = F, quote = F, append = T)
       system(paste0("rm -r ", file))
     }
-    
+
     # load the file and calculate BL_score
     graph <- data.table::fread(merged_file)
     graph$score <- calc_BL_score(graph, chains)
-    cols = c("from_receptor_id", "to_receptor_id", "score")
+    cols <- c("from_receptor_id", "to_receptor_id", "score")
     graph <- graph[, ..cols]
-    
+
     # save scores file if requested
-    if (!is.na(scores_filename)){
-      if (grepl("[Rr]ds$", scores_filename)){
+    if (!is.na(scores_filename)) {
+      if (grepl("[Rr]ds$", scores_filename)) {
         saveRDS(graph, scores_filename)
       } else {
         write.table(graph, scores_filename, quote = F, sep = "\t", row.names = F)
       }
     }
-    
+
     b <- Sys.time()
-    time_diff = b-a
+    time_diff <- b-a
     print(paste0("Scores were calculated in ", round(time_diff, 3), " ", units(time_diff)))
-    
+
     graph
   },
-  
+
   error = function(cond){
     message(cond)
     return(NULL)
   },
-  
+
   warning = function(cond){
     message(cond)
     return(NULL)
   },
-  
-  finally = { 
+
+  finally = {
     # remove temporary files folder
     tmp_folder_full = paste0(tmp_folder, "/BL_score_tmp")
-    if (file.exists(tmp_folder_full)){
+    if (file.exists(tmp_folder_full)) {
       system(paste0("rm -r ", tmp_folder_full))
     }
-    
+
     # remove temporary file with scores if exists
-    if (file.exists(paste0(tmp_folder, "/BL_scores.csv"))){
+    if (file.exists(paste0(tmp_folder, "/BL_scores.csv"))) {
       system(paste0("rm -r ", tmp_folder, "/BL_scores.csv"))
     }
   })
