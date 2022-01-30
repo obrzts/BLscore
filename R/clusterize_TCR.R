@@ -125,7 +125,7 @@ clusterize_TCR <- function(sequence_df, chains, tmp_folder, id_col,
 
   # select or create unique receptor_id column and index the data.table
   if (missing(id_col)) {
-    sequence_dt[, receptor_id := 1:.N]
+    sequence_dt[, receptor_id := seq_len(.N)]
 
   } else {
     # check if id_col exists
@@ -134,14 +134,14 @@ clusterize_TCR <- function(sequence_df, chains, tmp_folder, id_col,
       if (nrow(sequence_dt) != length(unique(sequence_dt[[id_col]]))) {
         warning(paste0("Provided id_col (", id_col,
                        ") contains duplicated values, ids will be generated based on the order in the input table" ))
-        sequence_dt[, receptor_id := 1:.N]
+        sequence_dt[, receptor_id := seq_len(.N)]
       } else {
         sequence_dt[, receptor_id := get(id_col)]
       }
     } else {
       warning(paste0("Column with name ", id_col,
                      " is not found, ids will be generated based on the order in the input table" ))
-      sequence_dt[, receptor_id := 1:.N]
+      sequence_dt[, receptor_id := seq_len(.N)]
     }
   }
 
@@ -186,4 +186,4 @@ clusterize_TCR <- function(sequence_df, chains, tmp_folder, id_col,
   return(clusters)
 }
 
-.datatable.aware = TRUE
+#.datatable.aware = TRUE

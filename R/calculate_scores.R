@@ -48,7 +48,7 @@ get_scores_paired <- function(dt,
   # write output in a temporary file
   filename <- paste0(output_file_prefix, receptor1, ".csv")
   receptor_pairs %>%
-    write.table(filename, quote=F, row.names=F, sep="\t")
+    utils::write.table(filename, quote=F, row.names=F, sep="\t")
 }
 
 
@@ -74,7 +74,7 @@ get_scores_beta <- function(dt, receptor1, receptor2_vec,
   # write output in a temporary file
   filename <- paste0(output_file_prefix, receptor1, ".csv")
   receptor_pairs %>%
-    write.table(filename, quote=F, row.names=F, sep="\t")
+    utils::write.table(filename, quote=F, row.names=F, sep="\t")
 }
 
 
@@ -125,14 +125,14 @@ calculate_scores <- function(sequence_dt, chains, tmp_folder, scores_filename, n
     print("Aligning sequences...")
     a <- Sys.time()
     if (chains == "AB") {
-      x <- parallel::mclapply(1:(nrow(sequence_dt) - 1),
+      x <- parallel::mclapply(seq_len(nrow(sequence_dt) - 1),
                               function(i) get_scores_paired(sequence_dt,
                                                             receptor1 = sequence_dt$receptor_id[i],
                                                             receptor2_vec = sequence_dt$receptor_id[(i+1):nrow(sequence_dt)],
                                                             tmp_folder_full),
                               mc.cores = ncores)
     } else if (chains == "B") {
-      x <- parallel::mclapply(1:(nrow(sequence_dt) - 1),
+      x <- parallel::mclapply(seq_len(nrow(sequence_dt) - 1),
                               function(i) get_scores_beta(sequence_dt,
                                                           receptor1 = sequence_dt$receptor_id[i],
                                                           receptor2_vec = sequence_dt$receptor_id[(i+1):nrow(sequence_dt)],
@@ -151,7 +151,7 @@ calculate_scores <- function(sequence_dt, chains, tmp_folder, scores_filename, n
 
     for (file in list.files(tmp_folder_full, full.names = T)) {
       data.table::fread(file) %>%
-        write.table(merged_file,
+        utils::write.table(merged_file,
                     sep = '\t', row.names = F, col.names = F, quote = F, append = T)
       system(paste0("rm -r ", file))
     }
@@ -167,7 +167,7 @@ calculate_scores <- function(sequence_dt, chains, tmp_folder, scores_filename, n
       if (grepl("[Rr]ds$", scores_filename)) {
         saveRDS(graph, scores_filename)
       } else {
-        write.table(graph, scores_filename, quote = F, sep = "\t", row.names = F)
+        utils::write.table(graph, scores_filename, quote = F, sep = "\t", row.names = F)
       }
     }
 
