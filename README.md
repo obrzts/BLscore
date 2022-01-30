@@ -68,6 +68,20 @@ scores will be overestimated which may lead to wrong cluster assignment.
 Usage example:
 
 ``` r
-# clusters = clusterize_TCR(example_TCR_df, chains="AB", tmp_folder=".", ncores=4)
-# head(clusters)
+clusters = clusterize_TCR(example_TCR_df, chains="AB", id_col = "id", tmp_folder=".", ncores=4)
+head(clusters)
+#>   cluster_id   v_beta  j_beta   junction_beta    junction_alpha      v_alpha
+#> 1          1   TRBV15 TRBJ1-2 CATRRNRGNTYGYTF    CAVRQTAAGNKLTF       TRAV21
+#> 2          2   TRBV13 TRBJ2-2    CASRQTSGELFF     CAVKGGGADGITF      TRAV8-1
+#> 3          3  TRBV7-9 TRBJ1-5 CASSSSLAGDQPQHF     CATDGGGAQKLVF       TRAV17
+#> 4          4 TRBV12-4 TRBJ2-1 CASSLSGGSYNEQFF    CVVNPVDSSYKLIF     TRAV12-1
+#> 5          5 TRBV12-4 TRBJ2-7 CASSSSGVGFYEQYF     CARGETSYDKVIF     TRAV13-1
+#> 6          6 TRBV12-3 TRBJ2-7    CASSFGVYEQYF CAYSSGAGGTSYGKLTF TRAV38-2/DV8
+#>   j_alpha id
+#> 1  TRAJ17  1
+#> 2  TRAJ45  2
+#> 3  TRAJ54  3
+#> 4  TRAJ12  4
+#> 5  TRAJ50  5
+#> 6  TRAJ52  6
 ```

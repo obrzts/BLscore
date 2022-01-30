@@ -70,6 +70,6 @@ which may lead to wrong cluster assignment.
 Usage example:
 
 ```{r}
-# clusters = clusterize_TCR(example_TCR_df, chains="AB", tmp_folder=".", ncores=4)
-# head(clusters)
+clusters = clusterize_TCR(example_TCR_df, chains="AB", id_col = "id", tmp_folder=".", ncores=4)
+head(clusters)
 ```

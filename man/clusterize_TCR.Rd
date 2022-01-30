@@ -54,3 +54,7 @@ TCRs recognizing the same epitope. If instead of full junction only CDR3 sequenc
 witout flanking residues is provided the scores will be overestimated which may
 lead to wrong cluster assignment.
 }
+\examples{
+clusters <- clusterize_TCR(example_TCR_df, chains="AB", id_col="id", tmp_folder=".", ncores=2)
+
+}

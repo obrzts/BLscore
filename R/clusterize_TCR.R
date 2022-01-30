@@ -30,8 +30,8 @@
 #' lead to wrong cluster assignment.
 #'
 #' @examples
-# clusters <- clusterize_TCR(example_TCR_df, chains="AB", id_col="id", tmp_folder=".", ncores=2)
-#
+#' clusters <- clusterize_TCR(example_TCR_df, chains="AB", id_col="id", tmp_folder=".", ncores=2)
+#'
 clusterize_TCR <- function(sequence_df, chains, tmp_folder, id_col,
                            scores_filename=NA, threshold=NA, ncores=1){
 
