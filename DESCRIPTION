@@ -2,8 +2,7 @@ Package: BLscore
 Title: Clustering Similar TCRs Likely Recognizing Same Epitope
 Version: 0.0.0.9000
 Authors@R: 
-    person("Anna", "Obraztsova", , "a.obraztcova@dkfz.de", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+    person("Anna", "Obraztsova", , "a.obraztcova@dkfz.de", role = c("aut", "cre"))
 Description: BLscore provides functions to identify clusters of convergent
     TCRs that are likely to recognize the same peptide. The clustering is
     based on pairwise comparisons of all TCRs by aligning their CDR1-3 and
@@ -29,3 +28,6 @@ Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
+Depends: 
+    R (>= 2.10)
+LazyData: true

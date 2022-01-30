@@ -19,19 +19,21 @@ clusterize_TCR(
 describe a unique TCR sequence. Following fields are required:
 \itemize{
 \item junction_beta - amino acid sequence of CDR3 plus the two flanking conserved residues
-\item v_beta, j_beta - V and J gene with or without allele
+\item v_beta, j_beta - V and J gene with or without allele; allele information is
+not used for score calculation.
 }
 
 If chains="AB" junction_alpha, v_alpha and j_alpha must be provided too.}
 
-\item{chains}{Which chains to cluster. "B" for beta chain only, "AB" for paired alpha and beta chains.}
+\item{chains}{Which chains to cluster. "B" for beta chain only, "AB" for paired
+alpha and beta chains.}
 
 \item{tmp_folder}{Path to a directory for storing temporary files which are
 deleted when clustering is finished.}
 
 \item{id_col}{Name of a column with unique ids for each TCR (optional).}
 
-\item{scores_filename}{If character string for naming a file is provided
+\item{scores_filename}{If a character string for naming a file is provided
 BL-scores of each TCR pair will be exported to this file. Supported formats: .Rds, .csv.}
 
 \item{threshold}{Clustering threshold (optional).}
@@ -43,7 +45,8 @@ A data.frame containing same information as sequence_df plus the cluster ids.
 If scores_filename is provided a file with pairwise BL-scores is created.
 }
 \description{
-Find clusters of similar TCRS that are likely to recognize the same epitope.
+Find clusters of similar TCRs that are likely to recognize the
+same epitope.
 }
 \details{
 The default clustering thresholds were defined to optimally detect clusters of
