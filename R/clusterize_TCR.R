@@ -48,14 +48,14 @@ clusterize_TCR <- function(sequence_df, chains, tmp_folder, id_col,
   beta_cols <- c("v_beta", "j_beta", "junction_beta")
   missing_beta <- beta_cols[!beta_cols %in% colnames(sequence_df)]
   if (length(missing_beta) > 0) {
-    stop(paste0("Coulums ", paste(missing_beta, collapse = ", "),
+    stop(paste0("Coulumn(s) ", paste(missing_beta, collapse = ", "),
                 " are missing in sequence_df"))
   }
   if (chains == "AB") {
     alpha_cols <- c("v_alpha", "j_alpha", "junction_alpha")
     missing_alpha <- alpha_cols[!alpha_cols %in% colnames(sequence_df)]
     if (length(missing_alpha) > 0) {
-      stop(paste0("Chains AB specified, but coulums ",
+      stop(paste0("Chains AB specified, but coulumn(s) ",
                   paste(missing_alpha, collapse = ", "),
                   " are missing in sequence_df"))
     }
@@ -96,15 +96,16 @@ clusterize_TCR <- function(sequence_df, chains, tmp_folder, id_col,
   n_short_beta <- sum(nchar(sequence_dt$junction_beta) < 5)
   if (n_short_beta > 0) {
     warning(paste0(n_short_beta, " sequences having short junction in beta chain (<5 aa) will not be processed"))
+    sequence_dt <- sequence_dt[nchar(sequence_dt$junction_beta) > 4]
   }
-  sequence_dt <- sequence_dt[nchar(sequence_dt$junction_beta) > 4]
+
 
   if (chains == "AB") {
     n_short_alpha <- sum(nchar(sequence_dt$junction_alpha) < 5)
     if (n_short_alpha > 0) {
       warning(paste0(n_short_alpha, " sequences having short junction in alpha chain (<5 aa) will not be processed"))
+      sequence_dt <- sequence_dt[nchar(sequence_dt$junction_alpha) > 4]
     }
-    sequence_dt <- sequence_dt[nchar(sequence_dt$junction_alpha) > 4]
   }
 
 
@@ -145,6 +146,11 @@ clusterize_TCR <- function(sequence_df, chains, tmp_folder, id_col,
     }
   }
 
+  # check if data table is not empty
+  if (nrow(sequence_dt) < 2) {
+    stop(paste0(nrow(sequence_dt), " sequences, nothing to cluster!"))
+  }
+
   data.table::setkey(sequence_dt, receptor_id)
 
 
@@ -164,7 +170,7 @@ clusterize_TCR <- function(sequence_df, chains, tmp_folder, id_col,
 
   g <- igraph::graph_from_data_frame(sim_rec_pairs,
                                      directed = F,
-                                     vertices = as.character(sequence_df$receptor_id))
+                                     vertices = as.character(sequence_dt$receptor_id))
   clusters <- igraph::clusters(g)$membership
 
   # return columns with initial V gene names to the table
@@ -185,5 +191,3 @@ clusterize_TCR <- function(sequence_df, chains, tmp_folder, id_col,
 
   return(clusters)
 }
-
-#.datatable.aware = TRUE

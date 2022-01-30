@@ -109,17 +109,16 @@ calc_BL_score <- function(data, chains){
 calculate_scores <- function(sequence_dt, chains, tmp_folder, scores_filename, ncores){
   res <- tryCatch({
 
-    # load substitution matrix
-    # submat = read.csv("data/subst_matrix.csv")
-
-    # load non CDR3 scores
-    # trv_scores <- read.csv("data/trv_scores.csv", sep = "\t")
-    # trj_scores <- read.csv("data/trj_scores.csv", sep = "\t")
-
     # create temporary folder for files with individual receptor alignment results
     # individual results are stored and then merged to avoid RAM overconsumption
     tmp_folder_full <- paste0(tmp_folder, "/BL_score_tmp/")
     system(paste0("mkdir ", tmp_folder_full))
+
+    # legacy: rename junction to cdr3
+    sequence_dt[, cdr3_beta := junction_beta]
+    if (chains == "AB") {
+      sequence_dt[, cdr3_alpha := junction_alpha]
+    }
 
     # get alignment scores
     print("Aligning sequences...")
@@ -189,6 +188,13 @@ calculate_scores <- function(sequence_dt, chains, tmp_folder, scores_filename, n
   },
 
   finally = {
+    # legacy: remove cdr3 column
+    sequence_dt[, cdr3_beta := NULL]
+    if (chains == "AB") {
+      sequence_dt[, cdr3_alpha := NULL]
+    }
+
+
     # remove temporary files folder
     tmp_folder_full = paste0(tmp_folder, "/BL_score_tmp")
     if (file.exists(tmp_folder_full)) {
