@@ -46,9 +46,8 @@ get_scores_paired <- function(dt,
                                                          receptor_pairs$to_cdr3_beta)
 
   # write output in a temporary file
-  filename <- paste0(output_file_prefix, receptor1, ".csv")
-  receptor_pairs %>%
-    utils::write.table(filename, quote=F, row.names=F, sep="\t")
+  filename <- paste0(output_file_prefix, receptor1, ".Rds")
+  saveRDS(receptor_pairs, filename)
 }
 
 
@@ -72,9 +71,8 @@ get_scores_beta <- function(dt, receptor1, receptor2_vec,
                                                          receptor_pairs$to_cdr3_beta)
 
   # write output in a temporary file
-  filename <- paste0(output_file_prefix, receptor1, ".txt")
-  receptor_pairs %>%
-    utils::write.table(filename, quote=F, row.names=F, sep="\t")
+  filename <- paste0(output_file_prefix, receptor1, ".Rds")
+  saveRDS(receptor_pairs, filename)
 }
 
 
@@ -121,7 +119,7 @@ calculate_scores <- function(sequence_dt, chains, tmp_folder, scores_filename, n
     }
 
     # get alignment scores
-    #a <- Sys.time()
+    a <- Sys.time()
     if (chains == "AB") {
       x <- parallel::mclapply(seq_len(nrow(sequence_dt) - 1),
                               function(i) get_scores_paired(sequence_dt,
@@ -139,23 +137,23 @@ calculate_scores <- function(sequence_dt, chains, tmp_folder, scores_filename, n
     } else {
       stop("Unrecognized chains argument (specify AB or B)")
     }
+    a1 <- Sys.time()
 
     # create one merged file and delete temporary files
     merged_file <- paste0(tmp_folder, "/BL_scores.csv")
 
     # get column names from one of the files
-    out_colnames <- colnames(data.table::fread(paste0(tmp_folder_full, sequence_dt$receptor_id[1], ".csv")))
+    out_colnames <- colnames(readRDS(paste0(tmp_folder_full, sequence_dt$receptor_id[1], ".Rds")))
     write(paste(out_colnames, collapse = "\t"), merged_file)
 
+    files <- list.files(tmp_folder_full, full.names = T)
+    graph <- lapply(files, readRDS) %>%
+      data.table::rbindlist()
     for (file in list.files(tmp_folder_full, full.names = T)) {
-      data.table::fread(file) %>%
-        utils::write.table(merged_file,
-                    sep = '\t', row.names = F, col.names = F, quote = F, append = T)
       system(paste0("rm -r ", file))
     }
 
     # load the file and calculate BL_score
-    graph <- data.table::fread(merged_file)
     graph[, score := calc_BL_score(graph, chains)]
     cols <- c("from_receptor_id", "to_receptor_id", "score")
     graph <- graph[, ..cols]
@@ -169,9 +167,12 @@ calculate_scores <- function(sequence_dt, chains, tmp_folder, scores_filename, n
       }
     }
 
-    #b <- Sys.time()
-    #time_diff <- b-a
-    #print(paste0("Scores were calculated in ", round(time_diff, 3), " ", units(time_diff)))
+    b <- Sys.time()
+    time_diff <- b-a
+    print(paste0("Scores were calculated in ", round(time_diff, 3), " ", units(time_diff)))
+
+    time_diff <- b-a1
+    print(paste0("Aligned in ", round(time_diff, 3), " ", units(time_diff)))
 
     graph
   },
