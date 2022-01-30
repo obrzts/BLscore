@@ -1,17 +1,20 @@
 #' TCR sequence clustering
 #'
-#' @description Find clusters of similar TCRS that are likely to recognize the same epitope.
+#' @description Find clusters of similar TCRs that are likely to recognize the
+#' same epitope.
 #' @param sequence_df A data.frame containing TCR sequence data. Each row must
 #' describe a unique TCR sequence. Following fields are required:
 #' * junction_beta - amino acid sequence of CDR3 plus the two flanking conserved residues
-#' * v_beta, j_beta - V and J gene with or without allele
+#' * v_beta, j_beta - V and J gene with or without allele; allele information is
+#' not used for score calculation.
 #'
 #' If chains="AB" junction_alpha, v_alpha and j_alpha must be provided too.
 #' @param id_col Name of a column with unique ids for each TCR (optional).
-#' @param chains Which chains to cluster. "B" for beta chain only, "AB" for paired alpha and beta chains.
+#' @param chains Which chains to cluster. "B" for beta chain only, "AB" for paired
+#' alpha and beta chains.
 #' @param tmp_folder Path to a directory for storing temporary files which are
 #' deleted when clustering is finished.
-#' @param scores_filename If character string for naming a file is provided
+#' @param scores_filename If a character string for naming a file is provided
 #' BL-scores of each TCR pair will be exported to this file. Supported formats: .Rds, .csv.
 #' @param threshold Clustering threshold (optional).
 #' @param ncores The number of cores to use for parallel computation (default = 1).
@@ -60,6 +63,13 @@ clusterize_TCR <- function(sequence_df, chains, tmp_folder, id_col,
   # convert to data.table
   sequence_dt <- data.table::as.data.table(sequence_df)
 
+  # remove alleles
+  sequence_dt[, v_beta = gsub("\\*.+$", "", v_beta)]
+  sequence_dt[, j_beta = gsub("\\*.+$", "", j_beta)]
+  if (chains == "AB") {
+    sequence_dt[, v_alpha = gsub("\\*.+$", "", v_alpha)]
+    sequence_dt[, j_alpha = gsub("\\*.+$", "", j_alpha)]
+  }
 
   # filter out sequences with non-IMGT genes
   genes <- unique(c(sequence_dt$v_alpha, sequence_dt$v_beta,
@@ -145,7 +155,8 @@ clusterize_TCR <- function(sequence_df, chains, tmp_folder, id_col,
   }
 
   sim_rec_pairs <- scored_rec_pairs[score > threshold, .(from_receptor_id, to_receptor_id, weight = score)]
-  sim_rec_pairs$from_receptor_id <- as.character(sim_rec_pairs$from_receptor_id) # node ids should be characters otherwise messed up by igraph
+  # node ids should be characters otherwise messed up by igraph
+  sim_rec_pairs$from_receptor_id <- as.character(sim_rec_pairs$from_receptor_id)
   sim_rec_pairs$to_receptor_id <- as.character(sim_rec_pairs$to_receptor_id)
 
   g <- igraph::graph_from_data_frame(sim_rec_pairs,
@@ -158,7 +169,7 @@ clusterize_TCR <- function(sequence_df, chains, tmp_folder, id_col,
     dplyr::rename(cluster_id = values,
                   receptor_id = ind) %>%
     dplyr::mutate(receptor_id = as.integer(as.character(receptor_id))) %>%
-    merge(sequence_dt, by = "receptor_id")
+    merge(sequence_df, by = "receptor_id")
 
   return(clusters)
 }

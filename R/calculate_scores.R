@@ -102,13 +102,8 @@ calc_BL_score <- function(data, chains){
 
 #' Calculate BL-scores (BLOSUM-logistic) for each pair of TCRs in a dataset
 #'
-#' @param sequence_dt A data.frame containing TCR sequence data
-#' @param chains Which chains are available
-#' @param tmp_folder Path to a directory for storing temporary files
-#' @param scores_filename If character string for naming a file is provided
-#' BL-scores of each TCR pair will be exported to this file.
-#' @param ncores The number of cores to use for parallel computation.
-#'
+#' @param sequence_dt A data.table with TCR sequence data
+#' @inheritParams clusterize_TCR
 #' @return A data.table with id of first TCR, second TCR and the score
 #' @noRd
 calculate_scores <- function(sequence_dt, chains, tmp_folder, scores_filename, ncores){
