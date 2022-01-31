@@ -41,7 +41,7 @@ The input data.frame must contain following fields:
 -   junction_beta - amino acid sequence of CDR3 plus the two flanking
     conserved residues;
 -   v_beta, j_beta - V and J gene with or without allele; allele
-    information is not used for score calculation.
+    information is not used for the score calculation.
 
 If paired chain clustering is desired junction_alpha, v_alpha and
 j_alpha must be provided too.
@@ -60,10 +60,9 @@ head(example_TCR_df)
 #> 6 TRBV12-3 TRBJ2-7    CASSFGVYEQYF CAYSSGAGGTSYGKLTF TRAV38-2/DV8  TRAJ52  6
 ```
 
-Note, that the default clustering thresholds were defined to optimally
-detect clusters of TCRs recognizing the same epitope. If instead of full
-junction only CDR3 sequence witout flanking residues is provided the
-scores will be overestimated which may lead to wrong cluster assignment.
+Note, that the default thresholds for clustering were defined for full
+junction sequences. Providing only CDR3 sequence without flanking
+residues may lead to less accurate cluster assignment.
 
 Usage example:
 

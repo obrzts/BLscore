@@ -18,6 +18,7 @@
 #' BL-scores of each TCR pair will be exported to this file. Supported formats: .Rds, .csv.
 #' @param threshold Clustering threshold (optional).
 #' @param ncores The number of cores to use for parallel computation (default = 1).
+#' Using >1 core is not supported in Windows.
 #'
 #' @return A data.frame containing same information as sequence_df plus the cluster ids.
 #' If scores_filename is provided a file with pairwise BL-scores is created.
