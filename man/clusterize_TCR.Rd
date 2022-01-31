@@ -28,7 +28,7 @@ If chains="AB" junction_alpha, v_alpha and j_alpha must be provided too.}
 \item{chains}{Which chains to cluster. "B" for beta chain only, "AB" for paired
 alpha and beta chains.}
 
-\item{tmp_folder}{Path to a directory for storing temporary files which are
+\item{tmp_folder}{Path to a directory where temporary files could be stored. They are
 deleted when clustering is finished.}
 
 \item{id_col}{Name of a column with unique ids for each TCR.}

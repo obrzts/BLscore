@@ -46,7 +46,7 @@ get_scores_paired <- function(dt,
                                                          receptor_pairs$to_cdr3_beta)
 
   # write output in a temporary file
-  filename <- paste0(output_file_prefix, receptor1, ".Rds")
+  filename <- file.path(output_file_prefix, paste0(receptor1, ".Rds"))
   saveRDS(receptor_pairs, filename)
 }
 
@@ -71,7 +71,7 @@ get_scores_beta <- function(dt, receptor1, receptor2_vec,
                                                          receptor_pairs$to_cdr3_beta)
 
   # write output in a temporary file
-  filename <- paste0(output_file_prefix, receptor1, ".Rds")
+  filename <- file.path(output_file_prefix, paste0(receptor1, ".Rds"))
   saveRDS(receptor_pairs, filename)
 }
 
@@ -109,8 +109,8 @@ calculate_scores <- function(sequence_dt, chains, tmp_folder, scores_filename, n
 
     # create temporary folder for files with individual receptor alignment results
     # individual results are stored and then merged to avoid RAM overconsumption
-    tmp_folder_full <- paste0(tmp_folder, "/BL_score_tmp/")
-    system(paste0("mkdir ", tmp_folder_full))
+    tmp_folder_full <- file.path(tmp_folder, "BL_score_tmp")
+    dir.create(tmp_folder_full)
 
     # legacy: rename junction to cdr3
     sequence_dt[, cdr3_beta := junction_beta]
@@ -140,17 +140,18 @@ calculate_scores <- function(sequence_dt, chains, tmp_folder, scores_filename, n
     # a1 <- Sys.time()
 
     # create one merged file and delete temporary files
-    merged_file <- paste0(tmp_folder, "/BL_scores.csv")
+    merged_file <- file.path(tmp_folder, "BL_scores.csv")
 
     # get column names from one of the files
-    out_colnames <- colnames(readRDS(paste0(tmp_folder_full, sequence_dt$receptor_id[1], ".Rds")))
+    first_file = file.path(tmp_folder_full, paste0(sequence_dt$receptor_id[1], ".Rds"))
+    out_colnames <- colnames(readRDS(first_file))
     write(paste(out_colnames, collapse = "\t"), merged_file)
 
     files <- list.files(tmp_folder_full, full.names = T)
     graph <- lapply(files, readRDS) %>%
       data.table::rbindlist()
     for (file in list.files(tmp_folder_full, full.names = T)) {
-      system(paste0("rm -r ", file))
+      file.remove(file)
     }
 
     # load the file and calculate BL_score
@@ -196,14 +197,15 @@ calculate_scores <- function(sequence_dt, chains, tmp_folder, scores_filename, n
 
 
     # remove temporary files folder
-    tmp_folder_full = paste0(tmp_folder, "/BL_score_tmp")
+    tmp_folder_full = file.path(tmp_folder, "BL_score_tmp")
     if (file.exists(tmp_folder_full)) {
-      system(paste0("rm -r ", tmp_folder_full))
+      unlink(tmp_folder_full, recursive = T)
     }
 
     # remove temporary file with scores if exists
-    if (file.exists(paste0(tmp_folder, "/BL_scores.csv"))) {
-      system(paste0("rm -r ", tmp_folder, "/BL_scores.csv"))
+    scores_file = file.path(tmp_folder, "BL_scores.csv")
+    if (file.exists(scores_file)) {
+      file.remove(scores_file)
     }
   })
   return(res)

@@ -12,7 +12,7 @@
 #' @param id_col Name of a column with unique ids for each TCR.
 #' @param chains Which chains to cluster. "B" for beta chain only, "AB" for paired
 #' alpha and beta chains.
-#' @param tmp_folder Path to a directory for storing temporary files which are
+#' @param tmp_folder Path to a directory where temporary files could be stored. They are
 #' deleted when clustering is finished.
 #' @param scores_filename If a character string for naming a file is provided
 #' BL-scores of each TCR pair will be exported to this file. Supported formats: .Rds, .csv.
