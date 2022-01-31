@@ -55,7 +55,7 @@ not used for the score calculation.
 If paired chain clustering is desired junction_alpha, v_alpha and j_alpha must 
 be provided too.
 
-An example data.frame is provided with the package:
+Here is an example:
 
 ```{r}
 library(BLscore)
@@ -80,6 +80,6 @@ head(df)
 Then run clustering: 
 
 ```{r}
-clusters = clusterize_TCR(example_TCR_df, chains="AB", id_col = "id", tmp_folder=".", ncores=4)
+clusters = clusterize_TCR(df, chains="AB", id_col = "id", tmp_folder=".", ncores=4)
 head(clusters)
 ```
