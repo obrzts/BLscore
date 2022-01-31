@@ -26,7 +26,7 @@ You can install the development version of BLscore from
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("obrzts/BLscore_private")
+devtools::install_github("obrzts/BLscore")
 ```
 
 ## Usage
