@@ -38,7 +38,8 @@ BL-scores of each TCR pair will be exported to this file. Supported formats: .Rd
 
 \item{threshold}{Clustering threshold (optional).}
 
-\item{ncores}{The number of cores to use for parallel computation (default = 1).}
+\item{ncores}{The number of cores to use for parallel computation (default = 1).
+Using >1 core is not supported in Windows.}
 }
 \value{
 A data.frame containing same information as sequence_df plus the cluster ids.

@@ -41,13 +41,13 @@ devtools::install_github("obrzts/BLscore")
 
 ## Usage
 
-BLscore's main function is `clusterize_TCR` which takes a data.frame with TCR 
+BLscore's main function is `clusterize_TCR()` which takes a data.frame with TCR 
 sequence data, calculate pairwise BL-scores, uses them to define clusters of
-similar TCRs and return a data.frame with cluster ids.
+similar TCRs and returns a data.frame with cluster ids.
 
-The input data.frame must contain following fields:
+The input data.frame must contain the following fields:
 
-* junction_beta - amino acid sequence of CDR3 plus the two flanking conserved 
+* junction_beta - amino acid sequence of CDR3 plus the two conserved anchor
 residues;
 * v_beta, j_beta - V and J gene with or without allele; allele information is 
 not used for the score calculation.
@@ -63,10 +63,21 @@ head(example_TCR_df)
 ```
 
 Note, that the default thresholds for clustering were defined for full junction
-sequences. Providing only CDR3 sequence without flanking residues may lead to less
-accurate cluster assignment.
+sequences. Providing only CDR3 sequence without anchor residues may lead to less
+accurate cluster assignment. If you have only CDR3 sequences you can add anchor 
+residues with `add_cdr3_anchors()` function:
 
-Usage example:
+```{r}
+# make example table without anchor residues
+df <- example_TCR_df
+df$cdr3_beta <- substr(df$junction_beta, 2, nchar(df$junction_beta) - 2)
+
+# generate column with beta chain junction sequence
+df <- add_cdr3_anchors(df, chains="B", species="human")
+head(df)
+```
+
+Then run clustering: 
 
 ```{r}
 clusters = clusterize_TCR(example_TCR_df, chains="AB", id_col = "id", tmp_folder=".", ncores=4)

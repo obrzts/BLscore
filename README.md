@@ -31,15 +31,15 @@ devtools::install_github("obrzts/BLscore")
 
 ## Usage
 
-BLscore’s main function is `clusterize_TCR` which takes a data.frame
+BLscore’s main function is `clusterize_TCR()` which takes a data.frame
 with TCR sequence data, calculate pairwise BL-scores, uses them to
-define clusters of similar TCRs and return a data.frame with cluster
+define clusters of similar TCRs and returns a data.frame with cluster
 ids.
 
-The input data.frame must contain following fields:
+The input data.frame must contain the following fields:
 
--   junction_beta - amino acid sequence of CDR3 plus the two flanking
-    conserved residues;
+-   junction_beta - amino acid sequence of CDR3 plus the two conserved
+    anchor residues;
 -   v_beta, j_beta - V and J gene with or without allele; allele
     information is not used for the score calculation.
 
@@ -61,10 +61,36 @@ head(example_TCR_df)
 ```
 
 Note, that the default thresholds for clustering were defined for full
-junction sequences. Providing only CDR3 sequence without flanking
-residues may lead to less accurate cluster assignment.
+junction sequences. Providing only CDR3 sequence without anchor residues
+may lead to less accurate cluster assignment. If you have only CDR3
+sequences you can add anchor residues with `add_cdr3_anchors()`
+function:
 
-Usage example:
+``` r
+# make example table without anchor residues
+df <- example_TCR_df
+df$cdr3_beta <- substr(df$junction_beta, 2, nchar(df$junction_beta) - 2)
+
+# generate column with beta chain junction sequence
+df <- add_cdr3_anchors(df, chains="B", species="human")
+head(df)
+#>    j_beta  v_beta     junction_beta    junction_alpha  v_alpha j_alpha  id
+#> 1 TRBJ1-1 TRBV4-1     CASSQGQGNTEAF CAEKRYAGGTSYGKLTF TRAV13-2  TRAJ52  45
+#> 2 TRBJ1-1 TRBV5-1        CASVSGNEAF     CAVNGQAGTALIF  TRAV8-6  TRAJ15 786
+#> 3 TRBJ1-1 TRBV6-3      CASRKTLNTEAF   CALSGLNSGYSTLTF   TRAV16  TRAJ11  96
+#> 4 TRBJ1-1 TRBV5-4 CASSLSPGQGFRNTEAF   CAGQNRGIGANQFYF   TRAV25  TRAJ49  61
+#> 5 TRBJ1-1  TRBV28      CASSFQGFTEAF       CADYYGQNFVF    TRAV3  TRAJ26 766
+#> 6 TRBJ1-1 TRBV4-1   CASSQDNQQGGTEAF   CALGRYNNAGNMLTF   TRAV19  TRAJ39 813
+#>         cdr3_beta
+#> 1     ASSQGQGNTEA
+#> 2        ASVSGNEA
+#> 3      ASRKTLNTEA
+#> 4 ASSLSPGQGFRNTEA
+#> 5      ASSFQGFTEA
+#> 6   ASSQDNQQGGTEA
+```
+
+Then run clustering:
 
 ``` r
 clusters = clusterize_TCR(example_TCR_df, chains="AB", id_col = "id", tmp_folder=".", ncores=4)
