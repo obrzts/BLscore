@@ -19,7 +19,7 @@ are weighted differently in the logistic function. The weights and
 clustering thresholds were established using available data sets of TCRs
 with known specificity (VDJdb and IEDB).
 
-<img src="clustering_scheme.png" alt="BLscore calculation scheme"  width="1000" height="589">
+<img src="clustering_scheme.png" alt="BLscore calculation scheme"  width="700" height="412">
 
 ## Installation
 
@@ -29,6 +29,13 @@ You can install the development version of BLscore from
 ``` r
 # install.packages("devtools")
 devtools::install_github("obrzts/BLscore")
+```
+
+If you experience troubles with R connecting to GitHub, download zipped
+package from the website and run:
+
+``` r
+devtools::install_local("BLscore-master.zip")
 ```
 
 ## Usage
