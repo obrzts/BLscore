@@ -19,6 +19,8 @@ are weighted differently in the logistic function. The weights and
 clustering thresholds were established using available data sets of TCRs
 with known specificity (VDJdb and IEDB).
 
+<img src="clustering_scheme.pdf" alt="BLscore calculation scheme"  width="4200" height="4200">
+
 ## Installation
 
 You can install the development version of BLscore from
