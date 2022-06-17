@@ -19,7 +19,7 @@ are weighted differently in the logistic function. The weights and
 clustering thresholds were established using available data sets of TCRs
 with known specificity (VDJdb and IEDB).
 
-<img src="clustering_scheme.png" alt="BLscore calculation scheme"  width="4200" height="2476">
+<img src="clustering_scheme.png" alt="BLscore calculation scheme"  width="1000" height="589">
 
 ## Installation
 
@@ -112,3 +112,12 @@ head(clusters)
 #> 5  TRAJ50  5
 #> 6  TRAJ52  6
 ```
+
+## Citation
+
+Ilka Wahl, Anna Obraztsova, Julia Puchan, Rebecca Hundsdorfer, Sumana
+Chakravarty, B. Kim Lee Sim, Stephen L. Hoffman, Peter G. Kremsner,
+Benjamin Mordmüller, Hedda Wardemann, *“Clonal evolution and TCR
+specificity of the human TFH cell response to Plasmodium falciparum
+CSP”*, Science Immunology, 2022, Vol 7, Issue 72, [DOI:
+10.1126/sciimmunol.abm9644](https://doi.org/10.1126/sciimmunol.abm9644)
