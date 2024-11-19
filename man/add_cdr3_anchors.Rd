@@ -24,3 +24,11 @@ jucntion_alpha
 Construct full TCR junction sequence by adding conservative
 anchor residues (C and F/W) to CDR3 sequence.
 }
+\examples{
+# make example table without anchor residues
+df <- example_TCR_df
+df$cdr3_beta <- substr(df$junction_beta, 2, nchar(df$junction_beta) - 2)
+
+# generate column with beta chain junction sequence
+df <- add_cdr3_anchors(df, "B", species="human")
+}

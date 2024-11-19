@@ -18,14 +18,14 @@ cdr3_to_junction <- function(sequence_df, chain_to_modify, anchor_tbl){
   unkn_genes <- genes[!genes %in% known_j_beta]
 
   # merge tables and modify junction sequence
-  res <- sequence_df %>%
-    merge(anchor_tbl %>%
-            dplyr::filter(chain == chain_to_modify) %>%
-            dplyr::select(j, anchor) %>%
+  res <- sequence_df |>
+    merge(anchor_tbl |>
+            dplyr::filter(chain == chain_to_modify) |>
+            dplyr::select(j, anchor) |>
             dplyr::rename_with(~ c(j_name, "anchor"), c(j, anchor)),
-          all.x = T) %>%
+          all.x = T) |>
     dplyr::mutate(!!junc_name := ifelse(is.na(anchor), NA,
-                                        paste0("C", get(cdr3_name), anchor))) %>%
+                                        paste0("C", get(cdr3_name), anchor))) |>
     dplyr::select(-anchor)
 
   # notify about unknown genes
@@ -59,7 +59,7 @@ cdr3_to_junction <- function(sequence_df, chain_to_modify, anchor_tbl){
 #' df$cdr3_beta <- substr(df$junction_beta, 2, nchar(df$junction_beta) - 2)
 #'
 #' # generate column with beta chain junction sequence
-#' df <- add_cdr3_anchors(df, "B", species="human)
+#' df <- add_cdr3_anchors(df, "B", species="human")
 add_cdr3_anchors <- function(sequence_df, chains, species="human"){
 
   ### INPUT CHECK
@@ -92,13 +92,13 @@ add_cdr3_anchors <- function(sequence_df, chains, species="human"){
   if (!species %in% c("human", "mouse")) {
     stop('Invalid species (only human or mouse are supported)')
   } else {
-    anchor_tbl <- j_anchor %>%
+    anchor_tbl <- j_anchor |>
       dplyr::filter(sp == species)
   }
 
   ### ADDING RESIDUES
   if (chains %in% c("B", "AB")){
-    sequence_df <- sequence_df %>%
+    sequence_df <- sequence_df |>
       dplyr::mutate(j_beta_raw = j_beta,
                     j_beta = sub("\\*.+$", "", j_beta_raw))
     sequence_df <- cdr3_to_junction(sequence_df, chain_to_modify = "B", anchor_tbl)
@@ -106,7 +106,7 @@ add_cdr3_anchors <- function(sequence_df, chains, species="human"){
     sequence_df$j_beta_raw <- NULL
   }
   if (chains %in% c("A", "AB")){
-    sequence_df <- sequence_df %>%
+    sequence_df <- sequence_df |>
       dplyr::mutate(j_alpha_raw = j_alpha,
                     j_alpha = sub("\\*.+$", "", j_alpha_raw))
     sequence_df <- cdr3_to_junction(sequence_df, chain_to_modify = "A", anchor_tbl)

@@ -152,8 +152,8 @@ clusterize_TCR <- function(sequence_df, chains, tmp_folder, id_col,
     threshold <- if (chains == "AB") threshold_AB else threshold_B
   }
 
-  sim_rec_pairs <- scored_rec_pairs %>%
-    dplyr::filter(score > threshold) %>%
+  sim_rec_pairs <- scored_rec_pairs |>
+    dplyr::filter(score > threshold) |>
     dplyr::select(from_receptor_id, to_receptor_id, weight = score)
   # node ids should be characters otherwise messed up by igraph
   sim_rec_pairs$from_receptor_id <- as.character(sim_rec_pairs$from_receptor_id)
@@ -172,13 +172,13 @@ clusterize_TCR <- function(sequence_df, chains, tmp_folder, id_col,
     data.table::setnames(sequence_dt, old = c('v_alpha_raw','j_alpha_raw'), new = c('v_alpha','j_alpha'))
   }
 
-  clusters <- clusters %>%
-    utils::stack() %>%
+  clusters <- clusters |>
+    utils::stack() |>
     dplyr::rename(cluster_id = values,
-                  receptor_id = ind) %>%
-    dplyr::mutate(receptor_id = as.integer(as.character(receptor_id))) %>%
+                  receptor_id = ind) |>
+    dplyr::mutate(receptor_id = as.integer(as.character(receptor_id))) |>
     # merge to the full data.table to add all the info
-    merge(sequence_dt, by = "receptor_id") %>%
+    merge(sequence_dt, by = "receptor_id") |>
     dplyr::select(-receptor_id)
 
   return(clusters)

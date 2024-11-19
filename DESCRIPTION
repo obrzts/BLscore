@@ -18,6 +18,7 @@ Description: BLscore provides functions to identify clusters of convergent
 License: GPL (>= 3)
 Imports: 
     Biostrings,
+    pwalign,
     data.table,
     dplyr,
     igraph,
@@ -29,9 +30,9 @@ Suggests:
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.3.2
 Depends: 
-    R (>= 3.5.0)
+    R (>= 4.1.0)
 LazyData: true
 URL: https://github.com/obrzts/BLscore
 BugReports: https://github.com/obrzts/BLscore/issues

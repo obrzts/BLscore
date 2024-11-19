@@ -3,13 +3,13 @@ Sys.setenv("R_TESTS" = "")
 test_that("input check works", {
   expect_error(clusterize_TCR(example_TCR_df, chains="", tmp_folder=".", id_col="id", ncores=2))
 
-  test_df = example_TCR_df %>% dplyr::rename(cdr3_beta = junction_beta)
+  test_df = example_TCR_df |> dplyr::rename(cdr3_beta = junction_beta)
   expect_error(clusterize_TCR(test_df, chains="AB", tmp_folder=".", id_col="id", ncores=2))
 
-  test_df = example_TCR_df %>% dplyr::select(-contains("alpha"))
+  test_df = example_TCR_df |> dplyr::select(-contains("alpha"))
   expect_error(clusterize_TCR(test_df, chains="AB", tmp_folder=".", id_col="id", ncores=2))
 
-  test_df = example_TCR_df %>% dplyr::select(-contains("beta"))
+  test_df = example_TCR_df |> dplyr::select(-contains("beta"))
   expect_error(clusterize_TCR(test_df, chains="B", tmp_folder=".", id_col="id", ncores=2))
 })
 
